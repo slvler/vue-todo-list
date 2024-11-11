@@ -34,6 +34,7 @@
 
 </template>
 <script>
+    import {useToast} from "vue-toastification";
     import editModal from "../modals/EditModal";
 
     export default {
@@ -60,12 +61,14 @@
             },
             async updateTodoEvent(item){
 
+                const toast = useToast();
                 this.updateForm.id = item.id;
                 this.updateForm.title = item.title;
                 this.updateForm.desc = item.desc;
 
                 await axios.post('/api/product/edit', this.updateForm )
                     .then((response) => {
+                        toast.success(response.data.message);
                         console.log(response)
                     }).catch((error) => {
                         console.log(error);
@@ -73,30 +76,36 @@
                 this.classUpdate = true
             },
             async addTodoEvent(){
+                const toast = useToast();
                 let eventValueTitle = this.todoAddTitle;
                 let eventValueDesc = this.todoAddDesc;
 
                 await axios.post('api/product/add', {title: eventValueTitle, desc: eventValueDesc})
                     .then((response) => {
+                        toast.success(response.data.message);
                         this.getProduct();
                     }).catch((error) => {
                         console.log(error);
                     });
             },
             async changeStatus(item){
+                const toast = useToast();
                 let status = item.status === "0" ? "1" : "0"
                 await axios.post('api/product/change', { id: item.id, status: status } )
                     .then((response) => {
+                        toast.success(response.data.message);
                         console.log(response)
                     }).catch((error) => {
                         console.log(error);
                     });
             },
             async removeItem(index){
-              let itemId = index.id
+                const toast = useToast();
+                let itemId = index.id
 
                 await axios.get(`/api/product/destroy/${itemId}`)
                     .then((response) => {
+                        toast.success(response.data.message);
                         this.getProduct();
                     }).catch((error) => {
                         console.log(error);
