@@ -17,4 +17,5 @@ npm run watch
 laravel 9
 vue 3
 vue-router
+vue-toastification
 ```
