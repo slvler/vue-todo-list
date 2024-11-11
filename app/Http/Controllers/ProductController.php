@@ -2,62 +2,53 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Actions\Product\DeleteAction;
+use App\Http\Actions\Product\StoreAction;
+use App\Http\Actions\Product\UpdateAction;
+use App\Http\Requests\ProductChangeRequest;
+use App\Http\Requests\ProductEditRequest;
+use App\Http\Requests\ProductStoreRequest;
+use App\Http\Resources\ProductIndexResource;
+use App\Http\Utils\Message;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    use Message;
     public function index()
     {
-
         $products = Product::all();
-        return response()->json($products);
-    }
 
-    public function store(Request $request)
+        $data['products'] = ProductIndexResource::collection($products);
+        return $this->sendResponse(data: $data, message: "Başarılı");
+    }
+    public function store(ProductStoreRequest $request)
     {
-        $product = new Product();
-        $product->title = $request->title;
-        $product->desc = $request->desc;
-        $product->status = "0";
-        $product->save();
+        $product = (new StoreAction())->handle($request->validated());
 
-        return response()->json([
-            'data' => $product
-        ], 200);
+        $data['product'] = $product;
+        return $this->sendResponse(data: $data, message: "Başarılı");
     }
-    public function edit(Request $request){
+    public function edit(ProductEditRequest $request){
 
-        Product::query()
-            ->where('id','=', $request->item['id'])
-            ->update([
-                'title' => $request->item['title'],
-                'desc' => $request->item['desc']
-            ]);
-        return response()->json([
-            'data' => 'success'
-        ], 200);
+       $product = (new UpdateAction())->handle($request->validated());
 
+       $data['product'] = $product;
+       return $this->sendResponse(data: $data, message: "Başarılı");
     }
-    public function destroy(Request $request){
-        Product::query()
-            ->where('id','=',$request->id)
-            ->delete();
+    public function destroy($id){
 
-        return response()->json([
-            'data' => 'success'
-        ], 200);
+        $product = (new DeleteAction())->handle($id);
+
+        $data['product'] = $product;
+        return $this->sendResponse(data: $data, message: "Başarılı");
     }
-    public function change(Request $request){
+    public function change(ProductChangeRequest $request){
 
-        Product::query()
-            ->where('id','=', $request->id)
-            ->update([
-                'status' => $request->status
-            ]);
-        return response()->json([
-            'data' => 'success'
-        ], 200);
+        $product = (new UpdateAction())->handle($request->validated());
 
+        $data['product'] = $product;
+        return $this->sendResponse(data: $data, message: "Başarılı");
     }
 }

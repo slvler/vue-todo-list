@@ -10,6 +10,7 @@ npm install
 ```bash
 cp .env.example .env
 php artisan key:generate
+npm run watch
 ```
 ## Contents
 ```text

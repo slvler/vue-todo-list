@@ -16,10 +16,9 @@
                                     <li :class="[{ 'completed' : item.status === '1' }]" v-for="item in hours" :key="item">
                                         <div class="form-check">
                                             <label class="form-check-label">
-                                                <input @change="changeStatus(item)" class="checkbox" type="checkbox" :checked="item.status === '1'" > {{ item.title }} {{ item.desc}} <i class="input-helper"></i>
+                                                <input @change="changeStatus(item)" class="checkbox" type="checkbox" :checked="item.status === '1'" > {{ item.title }} {{ item.desc }} <i class="input-helper"></i>
                                             </label>
                                         </div>
-
                                         <i @click="editModalShow(item)" class="remove fa fa-edit"></i>
                                         <i @click="removeItem(item)" class="remove mdi mdi-close-circle-outline"></i>
                                     </li>
@@ -46,55 +45,71 @@
                 hours:[],
                 editModal: false,
                 itemModalValue: "",
-                classUpdate :false
+                classUpdate : false,
+                updateForm: {}
             }
         },
         methods:{
-            async getTodo(){
-               let response = await axios.get('/api/product')
-                if(response.status == 200)
-                {
-                    this.hours = response.data
-                }
+            async getProduct(){
+
+                await axios.get('api/product').then((response) => {
+                    this.hours = response.data.data.products
+                }).catch((error) => {
+                    console.log(error);
+                });
             },
             async updateTodoEvent(item){
-                let ItemDetail = item;
-                await axios.post('/api/product/edit', { item })
+
+                this.updateForm.id = item.id;
+                this.updateForm.title = item.title;
+                this.updateForm.desc = item.desc;
+
+                await axios.post('/api/product/edit', this.updateForm )
                     .then((response) => {
                         console.log(response)
+                    }).catch((error) => {
+                        console.log(error);
                     });
                 this.classUpdate = true
             },
             async addTodoEvent(){
                 let eventValueTitle = this.todoAddTitle;
                 let eventValueDesc = this.todoAddDesc;
+
                 await axios.post('api/product/add', {title: eventValueTitle, desc: eventValueDesc})
                     .then((response) => {
-                        //console.log(response.data);
-                        this.getTodo().push(response.data.data);
+                        this.getProduct();
+                    }).catch((error) => {
+                        console.log(error);
                     });
-            },
-            editModalShow(item){
-                this.itemModalValue = item
-                this.editModal= !this.editModal
             },
             async changeStatus(item){
                 let status = item.status === "0" ? "1" : "0"
                 await axios.post('api/product/change', { id: item.id, status: status } )
                     .then((response) => {
                         console.log(response)
+                    }).catch((error) => {
+                        console.log(error);
                     });
             },
             async removeItem(index){
               let itemId = index.id
-                await axios.post('api/product/destroy', { id:itemId } )
+
+                await axios.get(`/api/product/destroy/${itemId}`)
                     .then((response) => {
-                        this.getTodo().splice(index, 1);
+                        this.getProduct();
+                    }).catch((error) => {
+                        console.log(error);
                     });
-            }
+
+            },
+            editModalShow(item){
+                this.itemModalValue = item
+                this.editModal= !this.editModal
+            },
         },
         mounted() {
-            this.getTodo();
+            this.getProduct();
         },
     }
 </script>

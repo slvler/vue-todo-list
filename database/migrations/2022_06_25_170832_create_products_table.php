@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('desc');
             $table->string('image')->nullable();
-            $table->string('status');
+            $table->enum('status',["0","1"])->default("0");
             $table->timestamps();
         });
     }
